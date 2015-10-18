@@ -68,7 +68,7 @@
 				font-weight: 600;
 			}
 
-	
+
 			.social {
 				position: fixed;
 				left: 3%;
@@ -96,7 +96,7 @@
 			<div class="slides">
 
 				<section>
-					<h1 style="font-size: 2em;">Ember Design Patterns: 
+					<h1 style="font-size: 2em;">Ember Design Patterns:
 						<br>
 						<span class="emberized">Inversion of Control</span>
 					</h1>
@@ -121,7 +121,7 @@
 				</section>
 				<section>
 					<section>
-						<h1 style="font-size: 1em;">Design Patterns help abstract problems into solutions.</h1>
+						<h1 style="font-size: 1em;">Design Patterns help turn this:</h1>
 						<p class="fragment">I started out with some code</p>
 						<p class="fragment">Then created an Object</p>
 						<p class="fragment">Then a Service that <i>created</i> Objects</p>
@@ -131,13 +131,29 @@
 						<p class="fragment">Oh god, <i><b>what have I done</b></i></p>
 					</section>
 					<section>
-						<h1 style="font-size: 1em;">Components should be composable.</h2>
+						<h1 style="font-size: 1em;">Into something like this:</h2>
 						<p class="fragment">I create a Service</p>
 						<p class="fragment">I define some computed properties around my data</p>
 						<p class="fragment">I create a Component</p>
 						<p class="fragment">I inject my service into the component</p>
 						<p class="fragment">I define computed aliases for the data I need</p>
 					</section>
+				</section>
+
+				<section>
+					<section>
+						<h1 style="font-size: 2em;">Basics</h1>
+						<p class="fragment">Services should be designed to do <i>one</i> thing.</p>
+						<p class="fragment">Services shouldn't know about other services.</p>
+						<p class="fragment">Services can depend on other modules...</p>
+						<p class="fragment">...So long as those modules are well encapsulated.</p>
+					</section>
+          <section>
+            <h1 style="font-size: 2em;">Build Models</h1>
+            <p class="fragment">Ember doesn't have traditional MVC "models".</p>
+            <p class="fragment">Services are glue between views and data.</p>
+            <p class="fragment">They should also help you model the features your app provides</p>
+          </section>
 				</section>
 
 				<section>
@@ -160,14 +176,14 @@ export default Ember.Service.extend({
 					</section>
 
 					<section>
-						<h4>Computeds:</h4>
+						<h4>Properties:</h4>
 <pre data-trim><code>
 import Ember from 'ember';
 
 export default Ember.Service.extend({
- 
-  productsBundled: Ember.computed('products.[]', function () {
-    return this.get('products').mapBy('bundled', true);
+
+  productsInBundle: Ember.computed('products.[]', function () {
+    return this.get('products').mapBy('bundle', true);
   }),
 
   productsOnSale: Ember.computed('products.[]', function () {
@@ -175,6 +191,36 @@ export default Ember.Service.extend({
   })
 
 });
+</code></pre>
+					</section>
+				</section>
+
+				<section>
+				<h1 style="font-size: 1em; position: fixed; top: 50px; left: 30px;">
+					Component code:</h1>
+					<section>
+						<h4>Definition:</h4>
+<pre data-trim><code>
+import Ember from 'ember';
+
+export default Ember.Component.Extend({
+
+  products: Ember.inject.service(),
+
+  willInsertElement() {
+    this.setProperties({
+      onSale: this.products.get('productsOnSale'),
+      inBundle: this.products.get('productsInBundle')
+    })
+  }
+});
+</code></pre>
+					</section>
+
+					<section>
+						<h4>Properties:</h4>
+<pre data-trim><code>
+
 </code></pre>
 					</section>
 				<section>
@@ -191,12 +237,12 @@ export default Ember.Service.extend({
 		  js.id = id;
 		  js.src = "https://platform.twitter.com/widgets.js";
 		  fjs.parentNode.insertBefore(js, fjs);
-		 
+
 		  t._e = [];
 		  t.ready = function(f) {
 		    t._e.push(f);
 		  };
-		 
+
 		  return t;
 		}(document, "script", "twitter-wjs"));</script>
 		<script>
@@ -227,7 +273,7 @@ export default Ember.Service.extend({
 			  document.getElementById('followButton')
 			);
 		});
-		
+
 		</script>
 
 	</body>
