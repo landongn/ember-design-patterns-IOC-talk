@@ -1,165 +1,177 @@
 <!doctype html>
 <html lang="en">
 
-	<head>
-		<meta charset="utf-8">
+    <head>
+        <meta charset="utf-8">
 
-		<title>Ember Design Patterns: Inversion of Control</title>
+        <title>Ember Design Patterns: Inversion of Control</title>
 
-		<meta name="description" content="Getting going with Ember -- Not to be confused with getting started with ember.">
-		<meta name="author" content="Landon Noss">
+        <meta name="description" content="Getting going with Ember -- Not to be confused with getting started with ember.">
+        <meta name="author" content="Landon Noss">
 
-		<meta name="apple-mobile-web-app-capable" content="yes" />
-		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
 
-		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/sky.css" id="theme">
+        <link rel="stylesheet" href="css/reveal.css">
+        <link rel="stylesheet" href="css/theme/sky.css" id="theme">
 
-		<!-- Code syntax highlighting -->
-		<link rel="stylesheet" href="lib/css/zenburn.css">
-		<link href='https://fonts.googleapis.com/css?family=Maven+Pro:400,500,900,700' rel='stylesheet' type='text/css'>
+        <!-- Code syntax highlighting -->
+        <link rel="stylesheet" href="lib/css/zenburn.css">
+        <link href='https://fonts.googleapis.com/css?family=Maven+Pro:400,500,900,700' rel='stylesheet' type='text/css'>
 
-		<!-- Printing and PDF exports -->
-		<script>
-			var link = document.createElement( 'link' );
-			link.rel = 'stylesheet';
-			link.type = 'text/css';
-			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
-			document.getElementsByTagName( 'head' )[0].appendChild( link );
-		</script>
+        <!-- Printing and PDF exports -->
+        <script>
+            var link = document.createElement( 'link' );
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+            document.getElementsByTagName( 'head' )[0].appendChild( link );
+        </script>
 
-		<style>
-			body {
-				background: no-repeat top center #faf4f1;
-				background-image: url("/lib/background-shades.svg"),none;
-			}
-			.reveal h1, .reveal h2, .reveal h3, .reveal h4, .reveal h5, .reveal h6 {
-				font-family: 'Maven Pro', sans-serif;
-				text-transform: none;
-				font-weight: 400;
-				letter-spacing: 0.5px;
-			}
-			p, span, small, strong {
-				font-family: 'Maven Pro', sans-serif;
-			}
-			header {
-				position: absolute;
-				width: 100%;
-				min-width: 960px;
-				top: 0;
-				height: 60px;
-				background: #e1563f top center;
-				background-image: url("/lib/navigation_background_x2.png");
-				border-bottom: 1px solid #aa412f;
-				z-index: 10;
-				-moz-box-shadow: rgba(0,0,0,0.3) 0 0 3px;
-				-webkit-box-shadow: rgba(0,0,0,0.3) 0 0 3px;
-				box-shadow: rgba(0,0,0,0.3) 0 0 3px;
-			}
+        <style>
+            body {
+                background: no-repeat top center #faf4f1;
+                background-image: url("/lib/background-shades.svg"),none;
+            }
+            .reveal h1, .reveal h2, .reveal h3, .reveal h4, .reveal h5, .reveal h6 {
+                font-family: 'Maven Pro', sans-serif;
+                text-transform: none;
+                font-weight: 400;
+                letter-spacing: 0.5px;
+            }
+            p, span, small, strong {
+                font-family: 'Maven Pro', sans-serif;
+            }
+            header {
+                position: absolute;
+                width: 100%;
+                min-width: 960px;
+                top: 0;
+                height: 60px;
+                background: #e1563f top center;
+                background-image: url("/lib/navigation_background_x2.png");
+                border-bottom: 1px solid #aa412f;
+                z-index: 10;
+                -moz-box-shadow: rgba(0,0,0,0.3) 0 0 3px;
+                -webkit-box-shadow: rgba(0,0,0,0.3) 0 0 3px;
+                box-shadow: rgba(0,0,0,0.3) 0 0 3px;
+            }
 
-			header h2 {
-				color: #eee;
-				padding: 0;
-				margin: 20px 0 0 20px;
-				font-size: 16px;
-				font-family: 'Maven Pro';
-				font-weight: 600;
-			}
+            header h2 {
+                color: #eee;
+                padding: 0;
+                margin: 20px 0 0 20px;
+                font-size: 16px;
+                font-family: 'Maven Pro';
+                font-weight: 600;
+            }
 
 
-			.social {
-				position: fixed;
-				left: 3%;
-				bottom: 15px;
-			}
+            .social {
+                position: fixed;
+                left: 3%;
+                bottom: 15px;
+            }
 
-			.emberized, h1 {
-				background: linear-gradient(to bottom, #fe845a, #d14e37); -webkit-background-clip: text;-webkit-text-fill-color: transparent;
-			}</style>
+            .emberized, h1 {
+                background: linear-gradient(to bottom, #fe845a, #d14e37); -webkit-background-clip: text;-webkit-text-fill-color: transparent;
+            }
 
-		<!--[if lt IE 9]>
-		<script src="lib/js/html5shiv.js"></script>
-		<![endif]-->
-	</head>
+            h1 {
+                font-size: 1em;
+            }
 
-	<body>
-		<header>
-			<h2>Ember Design Patterns: Inversion of Control</h2>
-			<section class="social" id="followButton"></section>
-		</header>
-		<img src="https://pbs.twimg.com/profile_images/643946915608965120/It03JTKH_400x400.jpg" style="position:fixed; top: 6px; right: 10px; border-radius: 10px; height: 48px; width: 48px; z-index: 100;">
-		<div class="reveal">
+        </style>
 
-			<!-- Any section element inside of this container is displayed as a slide -->
-			<div class="slides">
+        <!--[if lt IE 9]>
+        <script src="lib/js/html5shiv.js"></script>
+        <![endif]-->
+    </head>
 
-				<section>
-					<h1 style="font-size: 2em;">Ember Design Patterns:
-						<br>
-						<span class="emberized">Inversion of Control</span>
-					</h1>
-					<p>
-						<small>Created by <a href="http://landongn.com">Landon Noss</a> / <a href="http://twitter.com/landongn">@landongn</a></small>
-					</p>
-				</section>
+    <body>
+        <header>
+            <h2>Ember Design Patterns: Inversion of Control</h2>
+            <section class="social" id="followButton"></section>
+        </header>
+        <img src="https://pbs.twimg.com/profile_images/643946915608965120/It03JTKH_400x400.jpg" style="position:fixed; top: 6px; right: 10px; border-radius: 10px; height: 48px; width: 48px; z-index: 100;">
+        <div class="reveal">
 
-				<section>
-					<section>
-						<h1 style="font-size: 2em;">Disclaimer: Design Patterns are blueprints, not molds.</h1>
-						<img src="/lib/images/blueprint.jpg" height="50%" width="50%" alt="">
-					</section>
+            <!-- Any section element inside of this container is displayed as a slide -->
+            <div class="slides">
 
-					<section>
-						<h1 style="font-size: 1em;">Design Patterns are everywhere in Ember</h1>
-						<p class="fragment">Models, Views, Components</p>
-						<p class="fragment">Routing, Event Loop</p>
-						<p class="fragment">Mixins, Classes, Polymorphism</p>
-						<p class="fragment">Event Delegation, Dependency Injection</p>
-					</section>
-				</section>
-				<section>
-					<section>
-						<h1 style="font-size: 1em;">Design Patterns help turn this:</h1>
-						<p class="fragment">I started out with some code</p>
-						<p class="fragment">Then created an Object</p>
-						<p class="fragment">Then a Service that <i>created</i> Objects</p>
-						<p class="fragment">Then wrote some initializer and <i>injected</i> that Service</p>
-						<p class="fragment">Then everything broke</p>
-						<p class="fragment">Now I have an AbstractFactoryInjectionServiceObject</p>
-						<p class="fragment">Oh god, <i><b>what have I done</b></i></p>
-					</section>
-					<section>
-						<h1 style="font-size: 1em;">Into something like this:</h2>
-						<p class="fragment">I create a Service</p>
-						<p class="fragment">I define some computed properties around my data</p>
-						<p class="fragment">I create a Component</p>
-						<p class="fragment">I inject my service into the component</p>
-						<p class="fragment">I define computed aliases for the data I need</p>
-					</section>
-				</section>
+                <section>
+                    <h1 style="font-size: 2em;">Ember Design Patterns:
+                        <br>
+                        <span class="emberized">Inversion of Control</span>
+                    </h1>
+                    <p>
+                        <small>Created by <a href="http://landongn.com">Landon Noss</a> / <a href="http://twitter.com/landongn">@landongn</a></small>
+                    </p>
+                </section>
 
-				<section>
-					<section>
-						<h1 style="font-size: 2em;">Basics</h1>
-						<p class="fragment">Services should be designed to do <i>one</i> thing.</p>
-						<p class="fragment">Services shouldn't know about other services.</p>
-						<p class="fragment">Services can depend on other modules...</p>
-						<p class="fragment">...So long as those modules are well encapsulated.</p>
-					</section>
+                <section>
+                    <section>
+                        <h1 style="font-size: 2em;">Reminder: Design Patterns are blueprints, not molds.</h1>
+                    </section>
+
+                    <section>
+                        <h1 style="font-size: 1em;">Design Patterns are everywhere in Ember</h1>
+                        <p class="fragment">Models, Views, Components</p>
+                        <p class="fragment">Routing, Event Loop</p>
+                        <p class="fragment">Mixins, Classes, Polymorphism</p>
+                        <p class="fragment">Event Delegation, Dependency Injection</p>
+                    </section>
+
+                    <section>
+                        <h1 style="font-size: 2em;">Inversion of Control</h1>
+                        <p class="fragment"><blockquote>Don't call us, We'll call you.</blockquote></p>
+                    </section>
+                </section>
+
+
+                <section>
+                    <section>
+                        <h1 style="font-size: 1em;">Design Patterns help turn this:</h1>
+                        <p class="fragment">I started out with some code</p>
+                        <p class="fragment">Then created an Object</p>
+                        <p class="fragment">Then a Service that <i>created</i> Objects</p>
+                        <p class="fragment">Then wrote some initializer and <i>injected</i> that Service</p>
+                        <p class="fragment">Then everything broke</p>
+                        <p class="fragment">Now I have an AbstractFactoryInjectionServiceObject</p>
+                        <p class="fragment">Oh god, <i><b>what have I done</b></i></p>
+                    </section>
+                    <section>
+                        <h1 style="font-size: 1em;">Into something like this:</h2>
+                        <p class="fragment">I create a Service</p>
+                        <p class="fragment">I define some computed properties around my data</p>
+                        <p class="fragment">I create a Component</p>
+                        <p class="fragment">I inject my service into the component</p>
+                        <p class="fragment">I define computed aliases for the data I need</p>
+                    </section>
+                </section>
+
+                <section>
+                    <section>
+                        <h1 style="font-size: 2em;">Basics</h1>
+                        <p class="fragment">Services should be designed to do <i>one</i> thing.</p>
+                        <p class="fragment">Services shouldn't know about other services.</p>
+                        <p class="fragment">Services can depend on other modules...</p>
+                        <p class="fragment">...So long as those modules are well encapsulated.</p>
+                    </section>
           <section>
             <h1 style="font-size: 2em;">Build Models</h1>
             <p class="fragment">Ember doesn't have traditional MVC "models".</p>
             <p class="fragment">Services are glue between views and data.</p>
             <p class="fragment">They should also help you model the features your app provides</p>
           </section>
-				</section>
+                </section>
 
-				<section>
-				<h1 style="font-size: 1em; position: fixed; top: 50px; left: 30px;">Service Code</h1>
-					<section>
-						<h4>Definition:</h4>
+                <section>
+                <h1 style="font-size: 1em; position: fixed; top: 50px; left: 30px;">Service Code</h1>
+                    <section>
+                        <h4>Definition:</h4>
 <pre data-trim><code>
 import Ember from 'ember';
 
@@ -173,10 +185,10 @@ export default Ember.Service.extend({
   }
 });
 </code></pre>
-					</section>
+                    </section>
 
-					<section>
-						<h4>Properties:</h4>
+                    <section>
+                        <h4>Properties:</h4>
 <pre data-trim><code>
 import Ember from 'ember';
 
@@ -192,14 +204,14 @@ export default Ember.Service.extend({
 
 });
 </code></pre>
-					</section>
-				</section>
+                    </section>
+                </section>
 
-				<section>
-				<h1 style="font-size: 1em; position: fixed; top: 50px; left: 30px;">
-					Component code:</h1>
-					<section>
-						<h4>Definition:</h4>
+                <section>
+                <h1 style="font-size: 1em; position: fixed; top: 50px; left: 30px;">
+                    Component code:</h1>
+                    <section>
+                        <h4>Definition:</h4>
 <pre data-trim><code>
 import Ember from 'ember';
 
@@ -215,66 +227,66 @@ export default Ember.Component.Extend({
   }
 });
 </code></pre>
-					</section>
+                    </section>
 
-					<section>
-						<h4>Properties:</h4>
+                    <section>
+                        <h4>Properties:</h4>
 <pre data-trim><code>
 
 </code></pre>
-					</section>
-				<section>
-			</div>
-		</div>
+                    </section>
+                <section>
+            </div>
+        </div>
 
-		<script src="lib/js/head.min.js"></script>
-		<script src="js/reveal.js"></script>
-		<script>window.twttr = (function(d, s, id) {
-		  var js, fjs = d.getElementsByTagName(s)[0],
-		    t = window.twttr || {};
-		  if (d.getElementById(id)) return t;
-		  js = d.createElement(s);
-		  js.id = id;
-		  js.src = "https://platform.twitter.com/widgets.js";
-		  fjs.parentNode.insertBefore(js, fjs);
+        <script src="lib/js/head.min.js"></script>
+        <script src="js/reveal.js"></script>
+        <script>window.twttr = (function(d, s, id) {
+          var js, fjs = d.getElementsByTagName(s)[0],
+            t = window.twttr || {};
+          if (d.getElementById(id)) return t;
+          js = d.createElement(s);
+          js.id = id;
+          js.src = "https://platform.twitter.com/widgets.js";
+          fjs.parentNode.insertBefore(js, fjs);
 
-		  t._e = [];
-		  t.ready = function(f) {
-		    t._e.push(f);
-		  };
+          t._e = [];
+          t.ready = function(f) {
+            t._e.push(f);
+          };
 
-		  return t;
-		}(document, "script", "twitter-wjs"));</script>
-		<script>
+          return t;
+        }(document, "script", "twitter-wjs"));</script>
+        <script>
 
-			// Full list of configuration options available at:
-			// https://github.com/hakimel/reveal.js#configuration
-			Reveal.initialize({
-				controls: true,
-				progress: true,
-				history: true,
-				center: true,
+            // Full list of configuration options available at:
+            // https://github.com/hakimel/reveal.js#configuration
+            Reveal.initialize({
+                controls: true,
+                progress: true,
+                history: true,
+                center: true,
 
-				transition: 'zoom', // none/fade/slide/convex/concave/zoom
+                transition: 'zoom', // none/fade/slide/convex/concave/zoom
 
-				// Optional reveal.js plugins
-				dependencies: [
-					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
-					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
-					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
-					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
-					{ src: 'plugin/zoom-js/zoom.js', async: true },
-					{ src: 'plugin/notes/notes.js', async: true }
-				]
-			});
-		twttr.ready(function () {
-			twttr.widgets.createFollowButton(
-			  'landongn',
-			  document.getElementById('followButton')
-			);
-		});
+                // Optional reveal.js plugins
+                dependencies: [
+                    { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+                    { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    { src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+                    { src: 'plugin/zoom-js/zoom.js', async: true },
+                    { src: 'plugin/notes/notes.js', async: true }
+                ]
+            });
+        twttr.ready(function () {
+            twttr.widgets.createFollowButton(
+              'landongn',
+              document.getElementById('followButton')
+            );
+        });
 
-		</script>
+        </script>
 
-	</body>
+    </body>
 </html>
