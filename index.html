@@ -82,6 +82,11 @@
             h1 {
                 font-size: 1em;
             }
+            blockquote, blockquote.fragment {
+              font-family: 'Times new roman';
+              box-shadow: none;
+
+            }
 
         </style>
 
@@ -118,7 +123,7 @@
 
                     <section>
                         <h1 style="font-size: 1em;">Design Patterns are everywhere in Ember</h1>
-                        <p class="fragment">Models, Views, Components</p>
+                        <p class="fragment">Views, Components, Routes</p>
                         <p class="fragment">Routing, Event Loop</p>
                         <p class="fragment">Mixins, Classes, Polymorphism</p>
                         <p class="fragment">Event Delegation, Dependency Injection</p>
@@ -126,50 +131,60 @@
 
                     <section>
                         <h1 style="font-size: 2em;">Inversion of Control</h1>
-                        <p class="fragment"><blockquote>Don't call us, We'll call you.</blockquote></p>
+                        <blockquote class="fragment">Don't call us, We'll call you.</blockquote>
+                    </section>
+                    <section>
+                      <h1 style="font-size: 2em;">White-box vs Black-box</h1>
+                      <p class="fragment">White Boxes make you open 'em up and learn the internals</p>
+                      <p class="fragment">Black Boxes make you slot in your user-land code into the framework</p>
+                    </section>
+
+                    <section>
+                      <h1 style="font-size: 2em;">White box feels like:</h1>
+                      <p class="fragment">I started out with some code</p>
+                      <p class="fragment">Then created an Object</p>
+                      <p class="fragment">Then a Service that <i>created</i> Objects</p>
+                      <p class="fragment">Then wrote some initializer and <i>injected</i> that Service</p>
+                      <p class="fragment">Then everything broke</p>
+                      <p class="fragment">Now I have an AbstractFactoryInjectionServiceObject</p>
+                    </section>
+
+                    <section>
+                      <h1 style="font-size: 2em;">Black box feels like:</h1>
+                      <p class="fragment">I create a Service</p>
+                      <p class="fragment">I define some computed properties around my data</p>
+                      <p class="fragment">I create a Component</p>
+                      <p class="fragment">I inject my service into the component</p>
+                      <p class="fragment">I define properties from the service for the feature I need</p>
                     </section>
                 </section>
 
 
                 <section>
                     <section>
-                        <h1 style="font-size: 1em;">Design Patterns help turn this:</h1>
-                        <p class="fragment">I started out with some code</p>
-                        <p class="fragment">Then created an Object</p>
-                        <p class="fragment">Then a Service that <i>created</i> Objects</p>
-                        <p class="fragment">Then wrote some initializer and <i>injected</i> that Service</p>
-                        <p class="fragment">Then everything broke</p>
-                        <p class="fragment">Now I have an AbstractFactoryInjectionServiceObject</p>
-                        <p class="fragment">Oh god, <i><b>what have I done</b></i></p>
+                      <h1 style="font-size: 2em;">Services</h1>
+                      <p class="fragment">Services should be designed to do <i>one</i> thing.</p>
+                      <p class="fragment">Services shouldn't know about other services.</p>
+                      <p class="fragment">Services can depend on other modules...</p>
+                      <p class="fragment">...So long as those modules are well encapsulated.</p>
                     </section>
-                    <section>
-                        <h1 style="font-size: 1em;">Into something like this:</h2>
-                        <p class="fragment">I create a Service</p>
-                        <p class="fragment">I define some computed properties around my data</p>
-                        <p class="fragment">I create a Component</p>
-                        <p class="fragment">I inject my service into the component</p>
-                        <p class="fragment">I define computed aliases for the data I need</p>
-                    </section>
+                  <section>
+                    <h1 style="font-size: 2em;">Build Models</h1>
+                    <p class="fragment">No, not those kinds of models.</p>
+                    <p class="fragment">Services are models for <i>features.</i></p>
+                    <p class="fragment">They work best when they fully encapsulate a white-box feature.</p>
+                  </section>
+                  <section>
+                    <h1 style="font-size: 2em;">Example: Shopping Cart</h1>
+                    <p class="fragment">a Shopping Cart should be a service.</p>
+                    <p class="fragment">A cart contains Products, fetched from an API</p>
+                    <p class="fragment">Products have some metadata, such as price and sale discounts. </p>
+                    <p class="fragment">What would that look like?</p>
+                  </section>
                 </section>
 
                 <section>
-                    <section>
-                        <h1 style="font-size: 2em;">Basics</h1>
-                        <p class="fragment">Services should be designed to do <i>one</i> thing.</p>
-                        <p class="fragment">Services shouldn't know about other services.</p>
-                        <p class="fragment">Services can depend on other modules...</p>
-                        <p class="fragment">...So long as those modules are well encapsulated.</p>
-                    </section>
-          <section>
-            <h1 style="font-size: 2em;">Build Models</h1>
-            <p class="fragment">Ember doesn't have traditional MVC "models".</p>
-            <p class="fragment">Services are glue between views and data.</p>
-            <p class="fragment">They should also help you model the features your app provides</p>
-          </section>
-                </section>
-
-                <section>
-                <h1 style="font-size: 1em; position: fixed; top: 50px; left: 30px;">Service Code</h1>
+                <h1 style="font-size: 1em; position: fixed; top: 50px; left: 30px;">Cart Service</h1>
                     <section>
                         <h4>Definition:</h4>
 <pre data-trim><code>
@@ -178,33 +193,27 @@ import Ember from 'ember';
 export default Ember.Service.extend({
 
   products: Ember.A(),
-
-  init() {
-    // http://babeljs.io/docs/usage/experimental/ YAY
-    this.set('products', await hydrateService());
-  }
-});
-</code></pre>
-                    </section>
-
-                    <section>
-                        <h4>Properties:</h4>
-<pre data-trim><code>
-import Ember from 'ember';
-
-export default Ember.Service.extend({
-
+  inCart: Ember.A(),
+  subtotal: Ember.computed('inCart.[]', function () {},
+  taxRate: 0.03,
   productsInBundle: Ember.computed('products.[]', function () {
     return this.get('products').mapBy('bundle', true);
   }),
 
   productsOnSale: Ember.computed('products.[]', function () {
     return this.get('products').mapBy('sale', true);
-  })
+  }),
 
+  init() {
+    // http://babeljs.io/docs/usage/experimental/ YAY
+    this.get('products').pushObjects(await fetchCartForUser());
+    this.get('inCart').pushObjects(await fetchCartForUser());
+  }
 });
 </code></pre>
                     </section>
+
+
                 </section>
 
                 <section>
@@ -267,7 +276,7 @@ export default Ember.Component.Extend({
                 history: true,
                 center: true,
 
-                transition: 'zoom', // none/fade/slide/convex/concave/zoom
+                transition: 'slide', // none/fade/slide/convex/concave/zoom
 
                 // Optional reveal.js plugins
                 dependencies: [
