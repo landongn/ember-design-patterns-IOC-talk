@@ -283,7 +283,37 @@ Ember.Component.extend({
             </section>
 
             <section>
-              <h1></h1>
+              <h1>Lets Refactor</h1>
+              <p class="fragment">What if we wanted to abuse this delegation pattern for fun and profit?</p>
+              <p class="fragment">The way that couples the wrapper and the parents is gross.</p>
+              <p class="fragment">Here's another option:</p>
+            </section>
+
+            <section>
+              <section>
+              <pre class="fragment" data-trim>
+              <code>
+{{#cart-delegate cart as |cart| }}
+  {{#shopping-cart cart=cart}}
+    <nav>
+      <ul>
+        <li>Subtotal: {{subtotal cart=cart}}</li>
+        <li>Tax: {{tax cart=cart}}</li>
+        <li>{{checkout-button cart=cart}}</li>
+      </ul>
+      {{#each items as |item| }}
+        // etc
+      {{/each}}
+    </nav>
+  {{/shopping-cart}}
+
+  {{coupon-redemption cart=cart}}
+  {{discounts-applied cart=cart}}
+{{/cart-delegate}}
+              </code>
+                              </pre>
+                              <p class="fragment">Which approach is better?</p>
+                            </section>
             </section>
 
           </div>
