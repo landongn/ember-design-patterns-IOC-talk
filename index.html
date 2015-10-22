@@ -123,18 +123,19 @@
               <h1>Hi. Welcome to Gaikai</h1>
               <p class="fragment">We work on PlayStation Now.</p>
               <p class="fragment">We're Hiring Ember Developers!</p>
-              <p class="fragment">Introduce yourself to Reine and Rhea!</p>
+              <p class="fragment">Introduce yourself to Reine and Rhea! <br><img src="/lib/rhea.jpg" alt=""><img src="/lib/reine.jpg" alt=""></p>
+
             </section>
 
             <section>
               <h1>I'm Landon</h1>
               <p class="fragment">I work in the User Experience department</p>
               <p class="fragment">Our team built PlayStation Now for PS4 using Ember 1.x</p>
-              <p class="fragment">Prototype to Prod was about 8 months</p>
+              <p class="fragment">Prototype to release was about 8 months</p>
             </section>
 
             <section>
-              <h1>Nobody Knew Ember When We Started</h1>
+              <h1>The team was new to ember</h1>
               <p class="fragment">Learning the framework was easy</p>
               <p class="fragment">Learning how to work <i>with</i> the framework was hard</p>
             </section>
@@ -150,14 +151,15 @@
             <section>
               <h1>Patterns Helped, A Lot</h1>
               <p class="fragment">Pub/Sub -> Delegation</p>
-              <p class="fragment">State Machines -> View Lifecycle</p>
-              <p class="fragment">(Sub)Globals -> Services</p>
+              <p class="fragment">Pub/Sub Cont. -> Observers and Computed Properties</p>
+              <p class="fragment">State Management -> Route and View Lifecycles</p>
+              <p class="fragment">Globals -> Services</p>
             </section>
 
             <section>
               <h1>We Had To Stop Being Clever</h1>
-              <img src="/lib/xkcd1.png" alt="" class="fragment">
-              <aside style="font-size: 0.55em;" class="fragment">relevant xkcd: <a href="https://xkcd.com/974/">#974</a></aside>
+              <img src="/lib/xkcd1.png" alt="">
+              <aside style="font-size: 0.55em;">relevant xkcd: <a href="https://xkcd.com/974/">#974</a></aside>
             </section>
 
             <section>
@@ -190,6 +192,8 @@
 
               <section>
                 <h1>Do The Easy Thing: Components</h1>
+                <p class="fragment">Utilize attribute bindings and class bindings</p>
+                <p class="fragment">Utilize didInsert and willInsert appropriately</p>
                 <pre class="fragment" data-trim>
 <code>
 didInsertElement() {
@@ -200,21 +204,23 @@ didInsertElement() {
 }
 </code>
                 </pre>
-                <p class="fragment">Note: doing too much in didInsert can thrash glimmer, so always wrap if you have to do things on insert!</p>
+                <p class="fragment">Doing too much in didInsert can thrash glimmer so wrap if you have to do things on insert!</p>
               </section>
 
               <section>
-                  <pre class="fragment" data-trim>
+                  <pre data-trim>
 <code>
 Ember.Component.extend({
   willInsertElement: function () {
     // services injected, prior to insertion in the dom
-    // load data, fetch metadata, whatever.
+    // parse data, load animations pre-flight, whatever.
   }
 });
 </code>
                   </pre>
-                <p class="fragment">willInsertElement should always be used to handle loading data or otherwise asynchronous behavior, since it'll wait for the actions queue before resolving.</p>
+                <p class="fragment">willInsertElement isn't used enough.</p>
+                <p class="fragment">query services, pre-set animation states</p>
+                <p class="fragment">synchronous and blocking, so be smart</p>
               </section>
 
               <section>
@@ -284,8 +290,6 @@ Ember.Component.extend({
 
             <section>
               <h1>Lets Refactor</h1>
-              <p class="fragment">What if we wanted to abuse this delegation pattern for fun and profit?</p>
-              <p class="fragment">The way that couples the wrapper and the parents is gross.</p>
               <p class="fragment">Here's another option:</p>
             </section>
 
@@ -297,11 +301,11 @@ Ember.Component.extend({
   {{#shopping-cart cart=cart}}
     <nav>
       <ul>
-        <li>Subtotal: {{subtotal cart=cart}}</li>
-        <li>Tax: {{tax cart=cart}}</li>
-        <li>{{checkout-button cart=cart}}</li>
+        <li>Subtotal: {{cart.subtotal}}</li>
+        <li>Tax: {{cart.tax}}</li>
+        <li>{{checkout-button}}</li>
       </ul>
-      {{#each items as |item| }}
+      {{#each cart.items as |item| }}
         // etc
       {{/each}}
     </nav>
@@ -311,9 +315,145 @@ Ember.Component.extend({
   {{discounts-applied cart=cart}}
 {{/cart-delegate}}
               </code>
-                              </pre>
-                              <p class="fragment">Which approach is better?</p>
-                            </section>
+                </pre>
+                <p class="fragment">Which approach is better?</p>
+              </section>
+            </section>
+
+            <section>
+              <section>
+                <h1>Use computed aliases for super powered services</h1>
+<pre data-trim><code>
+Ember.Service.extend({
+  products: Ember.A(),
+  init: function () {
+    this.set('products', await someAPICall());
+  },
+  onSale: Ember.computed('products.[]', function () {
+    return this.get('products').filterBy('sale', true);
+  })
+});
+</code></pre>
+              </section>
+              <section>
+              <h1>aliases ftw</h1>
+<pre data-trim><code>
+Ember.Component.extend({
+  products: Ember.inject.service(),
+  onSale: Ember.computed.alias('products.onSale')
+});
+
+// hbs
+{{#each onSale as |product| }}
+  {{sale-product product=product}}
+{{/each}}
+
+</code></pre>
+              </section>
+            </section>
+
+            <section>
+              <section>
+                <h1>computed API rocks</h1>
+                <img src="/lib/computed-namespace.png" height="75%" width="75%" alt="" class="fragment">
+              </section>
+
+              <section>
+                <a href="http://emberjs.com/api/classes/Ember.computed.html#method_empty">empty</a>
+<pre data-trim><code>
+var ToDoList = Ember.Object.extend({
+  isDone: Ember.computed.empty('todos')
+});
+
+var todoList = ToDoList.create({
+  todos: ['Unit Test', 'Documentation', 'Release']
+});
+
+todoList.get('isDone'); // false
+todoList.get('todos').clear();
+todoList.get('isDone'); // true
+</code></pre>
+              </section>
+
+              <section>
+                <a href="http://emberjs.com/api/classes/Ember.computed.html#method_filter">filter</a>
+<pre data-trim><code>
+var Hamster = Ember.Object.extend({
+  remainingChores: Ember.computed.filter('chores', function(chore, index, array) {
+    return !chore.done;
+  })
+});
+
+var hamster = Hamster.create({
+  chores: [
+    { name: 'cook', done: true },
+    { name: 'clean', done: true },
+    { name: 'write more unit tests', done: false }
+  ]
+});
+
+hamster.get('remainingChores'); // [{name: 'write more unit tests', done: false}]
+</code></pre>
+              </section>
+              <section>
+                <h1>seriously, write more computeds</h1>
+              </section>
+            </section>
+
+            <section>
+              <section>
+                <h1>Creating your own lifecycles</h1>
+                <p class="fragment">isolate extensions and behaviors of the framework</p>
+                <p class="fragment">animation is a good example</p>
+              </section>
+
+              <section>
+                <h1>basic springs</h1>
+                <p class="fragment">springs are a solver loop (in rAF), and a factory method</p>
+                <p class="fragment">creating a component could have it's own spring</p>
+                <p class="fragment">consumers can override any defaults</p>
+                <p class="fragment">use lifecycle methods to trigger and animate</p>
+              </section>
+
+              <section>
+                <a href="https://gist.github.com/landongn/c7fe217cc6c4b6458107">View Source</a>
+<pre data-trim><code>
+Ember.Component.extend(Springable, {
+  willInsertElement: function () {
+    this.spring.createSpring(
+      this.springConfig.tension,
+      this.springConfig.friction
+    );
+  },
+  click: function (e) {
+    this.spring.setEndValue(e.clientOffsetX);
+  },
+  onSpringUpdate: function (spring) {
+    this.element.style.transform = 'translate3d(' + spring.currentValue() + 'px, 0, 0)';
+  }
+});
+</code></pre>
+              </section>
+
+              <section>
+                <a href="https://gist.github.com/landongn/d83bb56de58e71eea113">View Source</a>
+<pre data-trim>
+<code>
+Ember.Route.extend(Transitionable, {
+  transitionIn: function (done) {
+    done();
+  },
+  transitionOutTo: function (done) {
+
+  }
+});
+</code>
+</pre>
+              </section>
+            </section>
+
+            <section>
+              <h1>Q&amp;A!</h1>
             </section>
 
           </div>
